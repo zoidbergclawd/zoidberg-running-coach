@@ -1,0 +1,154 @@
+{
+  "project": "Zoidberg's Running Coach",
+  "goal": "A CLI tool that analyzes Garmin training data and provides half marathon coaching suggestions",
+  "target_user": "Jon McBee - preparing for spring half marathon",
+  "tech_stack": {
+    "language": "Python 3.11+",
+    "mcp_client": "mcp library for connecting to garth-mcp-server",
+    "cli": "click or typer for CLI interface",
+    "data": "pandas for analysis"
+  },
+  "items": [
+    {
+      "id": 1,
+      "category": "setup",
+      "description": "Project scaffolding with pyproject.toml, dependencies, and basic structure",
+      "steps": [
+        "Create pyproject.toml with dependencies (mcp, click, pandas, rich)",
+        "Create src/zoidberg_coach/ package structure",
+        "Create src/zoidberg_coach/__init__.py and __main__.py",
+        "Verify: python -m zoidberg_coach --help shows usage"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": 2,
+      "category": "integration",
+      "description": "Connect to Garmin MCP server and fetch activities",
+      "steps": [
+        "Create garmin_client.py with MCP connection logic",
+        "Implement get_recent_activities(days=30) function",
+        "Handle GARTH_TOKEN from environment",
+        "Verify: Can fetch and print last 10 activities"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": 3,
+      "category": "integration",
+      "description": "Fetch detailed activity data including splits and heart rate",
+      "steps": [
+        "Implement get_activity_details(activity_id) function",
+        "Parse splits/laps with pace and HR data",
+        "Implement get_activity_weather(activity_id) for context",
+        "Verify: Can display detailed breakdown of a run"
+      ],
+      "priority": 1,
+      "passes": false
+    },
+    {
+      "id": 4,
+      "category": "integration", 
+      "description": "Fetch recovery metrics (sleep, HRV, body battery)",
+      "steps": [
+        "Implement get_sleep_data(date) function",
+        "Implement get_hrv_data(date) function",
+        "Implement get_body_battery(date) function",
+        "Verify: Can display recovery summary for a given date"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": 5,
+      "category": "analysis",
+      "description": "Calculate weekly training load metrics",
+      "steps": [
+        "Implement weekly_mileage(activities) - total distance per week",
+        "Implement weekly_time_in_zones(activities) - HR zone distribution",
+        "Implement training_load_trend(weeks=8) - progressive overload check",
+        "Verify: CLI shows weekly summary with load progression"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": 6,
+      "category": "analysis",
+      "description": "Implement 80/20 polarized training analysis",
+      "steps": [
+        "Calculate time in Zone 1-2 (easy) vs Zone 3+ (hard)",
+        "Flag if ratio deviates significantly from 80/20",
+        "Correlate intensity distribution with recovery metrics",
+        "Verify: CLI shows polarization score and recommendations"
+      ],
+      "priority": 2,
+      "passes": false
+    },
+    {
+      "id": 7,
+      "category": "analysis",
+      "description": "Recovery readiness scoring",
+      "steps": [
+        "Combine sleep quality, HRV trend, body battery into readiness score",
+        "Implement readiness_score(date) returning 1-100",
+        "Factor in recent training load (fatigue accumulation)",
+        "Verify: CLI shows today's readiness with contributing factors"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": 8,
+      "category": "coaching",
+      "description": "Generate daily workout suggestions",
+      "steps": [
+        "Implement suggest_workout(readiness, recent_activities, goal_race)",
+        "Consider: days until race, recent intensity, recovery status",
+        "Suggest: easy run, tempo, intervals, long run, or rest",
+        "Include target pace/HR zones for the suggestion",
+        "Verify: CLI 'what-should-i-do-today' command works"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": 9,
+      "category": "coaching",
+      "description": "Half marathon race readiness assessment",
+      "steps": [
+        "Implement race_readiness(target_date, goal_time) function",
+        "Analyze: long run progression, weekly mileage trend, pace consistency",
+        "Calculate predicted finish time based on recent efforts",
+        "Identify gaps in training (e.g., not enough long runs)",
+        "Verify: CLI shows race readiness report with actionable feedback"
+      ],
+      "priority": 3,
+      "passes": false
+    },
+    {
+      "id": 10,
+      "category": "cli",
+      "description": "Polish CLI with rich output and all commands",
+      "steps": [
+        "Implement: summary (weekly overview)",
+        "Implement: today (readiness + workout suggestion)",
+        "Implement: race-prep (readiness assessment)",
+        "Implement: activity <id> (detailed activity view)",
+        "Use rich library for formatted tables and colors",
+        "Verify: All commands work and output is readable"
+      ],
+      "priority": 4,
+      "passes": false
+    }
+  ],
+  "quality_expectations": {
+    "type_hints": "All functions must have type hints",
+    "error_handling": "Graceful handling of missing data or API failures",
+    "documentation": "Docstrings on all public functions",
+    "testing": "Not required for v1, but structure code to be testable"
+  },
+  "stop_condition": "All items have passes: true and CLI demonstrates end-to-end workflow"
+}
