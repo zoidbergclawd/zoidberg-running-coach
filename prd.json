@@ -79,7 +79,13 @@
       "priority": 2,
       "passes": false,
       "can_verify_without_token": false,
-      "garth_classes": ["DailySleep", "DailyHRV", "HRVData", "DailyBodyBattery", "DailyStress"]
+      "garth_classes": [
+        "DailySleep",
+        "DailyHRV",
+        "HRVData",
+        "DailyBodyBattery",
+        "DailyStress"
+      ]
     },
     {
       "id": 5,
@@ -174,6 +180,47 @@
       "priority": 4,
       "passes": false,
       "can_verify_without_token": true
+    },
+    {
+      "id": 11,
+      "category": "analysis",
+      "description": "Pattern detection and inference engine",
+      "steps": [
+        "Create src/zoidberg_coach/patterns.py",
+        "Implement correlate_sleep_performance() - does sleep quality predict good runs?",
+        "Implement detect_overtraining_signals() - HRV declining + fatigue + performance drop",
+        "Implement find_optimal_conditions() - what conditions lead to best performances?",
+        "Implement weekly_pattern_report() returning list of insights as strings",
+        "Look for: day-of-week patterns, time-of-day patterns, recovery-to-performance correlations",
+        "Add CLI command: zoidberg-coach patterns --weeks 8",
+        "Verify: Shows 3-5 actionable insights based on historical data"
+      ],
+      "priority": 3,
+      "passes": false,
+      "can_verify_without_token": false,
+      "example_insights": [
+        "Your best runs happen after 7+ hours of sleep (avg pace 8:15 vs 8:45)",
+        "Tuesday/Thursday hard efforts correlate with lower HRV on Wednesdays",
+        "Long runs over 8 miles tend to suppress your HRV for 48-72 hours",
+        "Body battery below 40 predicts a subpar workout 80% of the time"
+      ]
+    },
+    {
+      "id": 12,
+      "category": "coaching",
+      "description": "Daily coaching report for Zoidberg cron job",
+      "steps": [
+        "Create generate_daily_report() returning structured dict with all coaching data",
+        "Include: readiness_score, todays_suggestion, recent_load_summary, pattern_insights, race_countdown",
+        "Add --format json option to relevant CLI commands for programmatic access",
+        "Add CLI command: zoidberg-coach daily-report --race-date YYYY-MM-DD --json",
+        "Output should be parseable so Zoidberg can craft personalized Slack messages",
+        "Verify: Command outputs complete JSON with all coaching context"
+      ],
+      "priority": 4,
+      "passes": false,
+      "can_verify_without_token": false,
+      "note": "This is what Zoidberg will call daily to generate coaching messages for Jon"
     }
   ],
   "quality_expectations": {
