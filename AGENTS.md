@@ -11,10 +11,18 @@ to analyze training data and provide half marathon coaching suggestions.
 ## Technical Stack
 
 - **Python 3.11+** with modern typing
-- **MCP client** for connecting to garth-mcp-server
-- **Click** or **Typer** for CLI
+- **garth** library for Garmin Connect API (same lib that powers garth-mcp-server)
+- **Typer** for CLI (preferred over Click - better type hints integration)
 - **Pandas** for data analysis
 - **Rich** for beautiful terminal output
+
+## Why garth instead of MCP?
+
+The garth-mcp-server is built on the `garth` Python library. Using garth directly is simpler:
+- No subprocess management or JSON-RPC protocol
+- Direct Python API calls
+- Same GARTH_TOKEN authentication
+- Better error messages and debugging
 
 ## Code Quality Standards
 
@@ -26,16 +34,47 @@ This is a **real project** that will be used for actual training. Not a prototyp
 - Clean separation: client → analysis → coaching → CLI layers
 - No magic numbers - use named constants for HR zones, thresholds, etc.
 
-## MCP Integration Notes
+## Garth Library Usage
 
-The garth-mcp-server is an external MCP server. Connection requires:
-- GARTH_TOKEN environment variable (from `uvx garth login`)
-- MCP client library to call tools
+Authentication:
+```python
+import garth
+from datetime import date
 
-Available tools include:
-- get_activities, get_activity_details, get_activity_splits
-- nightly_sleep, daily_hrv, daily_body_battery
-- user_profile, user_settings
+# Option 1: Load saved token from ~/.garth/
+garth.resume("~/.garth")
+
+# Option 2: Use token string
+garth.resume(token_string)
+
+# Configure domain
+garth.configure(domain="garmin.com")
+```
+
+Data Classes (preferred for structured data):
+```python
+from garth import DailySleep, DailyHRV, DailyStress, DailyBodyBattery
+
+sleep = DailySleep.get(date.today())
+hrv = DailyHRV.get(date.today())
+stress = DailyStress.get(date.today())
+battery = DailyBodyBattery.get(date.today())
+```
+
+Connect API (for activities and custom endpoints):
+```python
+# Get activities
+activities = garth.connectapi(
+    "/activitylist-service/activities/search/activities",
+    params={"limit": 20, "start": 0}
+)
+
+# Get activity details
+details = garth.connectapi(f"/activity-service/activity/{activity_id}")
+splits = garth.connectapi(f"/activity-service/activity/{activity_id}/splits")
+```
+
+Helpful garth source: https://github.com/matin/garth
 
 ## Domain Knowledge
 

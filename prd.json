@@ -4,9 +4,15 @@
   "target_user": "Jon McBee - preparing for spring half marathon",
   "tech_stack": {
     "language": "Python 3.11+",
-    "mcp_client": "mcp library for connecting to garth-mcp-server",
-    "cli": "click or typer for CLI interface",
-    "data": "pandas for analysis"
+    "garmin": "garth library (Python Garmin Connect client - same as garth-mcp-server uses)",
+    "cli": "typer for CLI interface",
+    "data": "pandas for analysis",
+    "output": "rich for beautiful terminal output"
+  },
+  "auth_notes": {
+    "token_source": "Run 'uvx garth login' to authenticate and get token",
+    "env_var": "GARTH_TOKEN - the OAuth token string",
+    "persistence": "Token is saved to ~/.garth by garth library"
   },
   "items": [
     {
@@ -14,141 +20,172 @@
       "category": "setup",
       "description": "Project scaffolding with pyproject.toml, dependencies, and basic structure",
       "steps": [
-        "Create pyproject.toml with dependencies (mcp, click, pandas, rich)",
+        "Create pyproject.toml with dependencies: garth, typer, pandas, rich",
         "Create src/zoidberg_coach/ package structure",
-        "Create src/zoidberg_coach/__init__.py and __main__.py",
-        "Verify: python -m zoidberg_coach --help shows usage"
+        "Create src/zoidberg_coach/__init__.py with version",
+        "Create src/zoidberg_coach/__main__.py that calls CLI",
+        "Create src/zoidberg_coach/cli.py with typer app and --help",
+        "Verify: pip install -e . && zoidberg-coach --help shows usage"
       ],
       "priority": 1,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": true
     },
     {
       "id": 2,
       "category": "integration",
-      "description": "Connect to Garmin MCP server and fetch activities",
+      "description": "Connect to Garmin via garth library and fetch activities",
       "steps": [
-        "Create garmin_client.py with MCP connection logic",
-        "Implement get_recent_activities(days=30) function",
-        "Handle GARTH_TOKEN from environment",
-        "Verify: Can fetch and print last 10 activities"
+        "Create src/zoidberg_coach/garmin_client.py",
+        "Implement GarminClient class that initializes garth connection",
+        "Handle auth: check for ~/.garth token OR GARTH_TOKEN env var",
+        "Implement get_activities(days=30) using garth.connectapi",
+        "Return list of activity dicts with: id, name, type, date, distance, duration",
+        "Add CLI command: zoidberg-coach activities --days 30",
+        "Verify: Command lists recent activities with distance and pace"
       ],
       "priority": 1,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false,
+      "garth_api": "garth.connectapi('/activitylist-service/activities/search/activities', params={...})"
     },
     {
       "id": 3,
       "category": "integration",
       "description": "Fetch detailed activity data including splits and heart rate",
       "steps": [
-        "Implement get_activity_details(activity_id) function",
-        "Parse splits/laps with pace and HR data",
-        "Implement get_activity_weather(activity_id) for context",
-        "Verify: Can display detailed breakdown of a run"
+        "Implement get_activity_details(activity_id) in GarminClient",
+        "Fetch splits/laps via garth.connectapi('/activity-service/activity/{id}/splits')",
+        "Parse each split: distance, duration, avg_hr, avg_pace",
+        "Add CLI command: zoidberg-coach activity <id>",
+        "Verify: Command shows lap-by-lap breakdown with pace and HR"
       ],
       "priority": 1,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false
     },
     {
       "id": 4,
-      "category": "integration", 
-      "description": "Fetch recovery metrics (sleep, HRV, body battery)",
+      "category": "integration",
+      "description": "Fetch recovery metrics using garth data classes",
       "steps": [
-        "Implement get_sleep_data(date) function",
-        "Implement get_hrv_data(date) function",
-        "Implement get_body_battery(date) function",
-        "Verify: Can display recovery summary for a given date"
+        "Implement get_sleep(date) using garth.DailySleep.get(date)",
+        "Implement get_hrv(date) using garth.DailyHRV.get(date) or HRVData.get()",
+        "Implement get_body_battery(date) using garth.DailyBodyBattery.get(date)",
+        "Implement get_stress(date) using garth.DailyStress.get(date)",
+        "Add CLI command: zoidberg-coach recovery [--date YYYY-MM-DD]",
+        "Verify: Command shows sleep score, HRV, body battery, stress for a date"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false,
+      "garth_classes": ["DailySleep", "DailyHRV", "HRVData", "DailyBodyBattery", "DailyStress"]
     },
     {
       "id": 5,
       "category": "analysis",
       "description": "Calculate weekly training load metrics",
       "steps": [
-        "Implement weekly_mileage(activities) - total distance per week",
-        "Implement weekly_time_in_zones(activities) - HR zone distribution",
-        "Implement training_load_trend(weeks=8) - progressive overload check",
-        "Verify: CLI shows weekly summary with load progression"
+        "Create src/zoidberg_coach/analysis.py",
+        "Implement weekly_summary(activities) returning dict per week: total_miles, total_time, run_count",
+        "Implement training_load_trend(weekly_summaries) checking 10% rule",
+        "Flag weeks with >10% mileage increase as potential overload",
+        "Add CLI command: zoidberg-coach summary --weeks 8",
+        "Verify: Shows weekly mileage progression with trend indicators"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false
     },
     {
       "id": 6,
       "category": "analysis",
       "description": "Implement 80/20 polarized training analysis",
       "steps": [
-        "Calculate time in Zone 1-2 (easy) vs Zone 3+ (hard)",
-        "Flag if ratio deviates significantly from 80/20",
-        "Correlate intensity distribution with recovery metrics",
-        "Verify: CLI shows polarization score and recommendations"
+        "Get user's HR zones from garth.UserSettings or calculate from max HR",
+        "For each activity, calculate time in Zone 1-2 vs Zone 3+",
+        "Aggregate across recent weeks to get polarization ratio",
+        "Add CLI command: zoidberg-coach polarization --weeks 4",
+        "Verify: Shows % easy vs % hard with recommendation if ratio is off"
       ],
       "priority": 2,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false
     },
     {
       "id": 7,
       "category": "analysis",
       "description": "Recovery readiness scoring",
       "steps": [
-        "Combine sleep quality, HRV trend, body battery into readiness score",
-        "Implement readiness_score(date) returning 1-100",
-        "Factor in recent training load (fatigue accumulation)",
-        "Verify: CLI shows today's readiness with contributing factors"
+        "Create src/zoidberg_coach/coaching.py",
+        "Implement readiness_score(sleep, hrv, body_battery, recent_load) -> 0-100",
+        "Weight factors: sleep quality (30%), HRV vs baseline (30%), body battery (20%), fatigue (20%)",
+        "Add interpretation: <50 = rest, 50-70 = easy only, 70-85 = normal, 85+ = ready for hard effort",
+        "Verify: readiness_score function works with sample data"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": true,
+      "note": "Can unit test scoring logic with mock data"
     },
     {
       "id": 8,
       "category": "coaching",
       "description": "Generate daily workout suggestions",
       "steps": [
-        "Implement suggest_workout(readiness, recent_activities, goal_race)",
-        "Consider: days until race, recent intensity, recovery status",
-        "Suggest: easy run, tempo, intervals, long run, or rest",
-        "Include target pace/HR zones for the suggestion",
-        "Verify: CLI 'what-should-i-do-today' command works"
+        "Implement suggest_workout(readiness, days_since_hard, days_until_race, weekly_mileage)",
+        "Logic: if readiness < 50 -> rest; if days_since_hard > 3 and readiness > 70 -> tempo/intervals",
+        "Include suggested duration and intensity based on current fitness",
+        "Add CLI command: zoidberg-coach today [--race-date YYYY-MM-DD]",
+        "Verify: Command shows today's readiness + workout suggestion"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false
     },
     {
       "id": 9,
       "category": "coaching",
       "description": "Half marathon race readiness assessment",
       "steps": [
-        "Implement race_readiness(target_date, goal_time) function",
-        "Analyze: long run progression, weekly mileage trend, pace consistency",
-        "Calculate predicted finish time based on recent efforts",
-        "Identify gaps in training (e.g., not enough long runs)",
-        "Verify: CLI shows race readiness report with actionable feedback"
+        "Implement race_readiness(activities, target_date, goal_time)",
+        "Check: longest run >= 10 miles, weekly mileage consistent, recent tempo paces",
+        "Predict finish time using Riegel formula from recent race/time trial",
+        "Identify gaps: 'Need more long runs', 'Mileage too low', etc.",
+        "Add CLI command: zoidberg-coach race-prep --date YYYY-MM-DD --goal HH:MM:SS",
+        "Verify: Shows readiness assessment with specific recommendations"
       ],
       "priority": 3,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": false
     },
     {
       "id": 10,
-      "category": "cli",
-      "description": "Polish CLI with rich output and all commands",
+      "category": "polish",
+      "description": "Polish CLI output with rich formatting",
       "steps": [
-        "Implement: summary (weekly overview)",
-        "Implement: today (readiness + workout suggestion)",
-        "Implement: race-prep (readiness assessment)",
-        "Implement: activity <id> (detailed activity view)",
-        "Use rich library for formatted tables and colors",
-        "Verify: All commands work and output is readable"
+        "Use rich.table.Table for tabular data (activities, weekly summaries)",
+        "Use rich.panel.Panel for readiness scores and recommendations",
+        "Add colors: green for good metrics, yellow for warning, red for concern",
+        "Add progress bars for metrics like polarization ratio",
+        "Ensure all commands have consistent, beautiful output",
+        "Verify: All commands produce readable, colorful terminal output"
       ],
       "priority": 4,
-      "passes": false
+      "passes": false,
+      "can_verify_without_token": true
     }
   ],
   "quality_expectations": {
     "type_hints": "All functions must have type hints",
-    "error_handling": "Graceful handling of missing data or API failures",
+    "error_handling": "Graceful handling when not authenticated - show helpful message",
     "documentation": "Docstrings on all public functions",
     "testing": "Not required for v1, but structure code to be testable"
   },
-  "stop_condition": "All items have passes: true and CLI demonstrates end-to-end workflow"
+  "stop_condition": "All items have passes: true and CLI demonstrates end-to-end workflow",
+  "ralph_notes": {
+    "without_token": "Items 1, 7, 10 can be completed without Garmin auth. Start there if token unavailable.",
+    "api_exploration": "Use garth library docs and source code to understand available endpoints",
+    "incremental_commits": "Commit after each working feature, even if not fully polished"
+  }
 }
