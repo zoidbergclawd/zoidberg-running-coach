@@ -18,6 +18,7 @@
     {
       "id": 1,
       "category": "setup",
+      "title": "Project Scaffold",
       "description": "Project scaffolding with pyproject.toml, dependencies, and basic structure",
       "steps": [
         "Create pyproject.toml with dependencies: garth, typer, pandas, rich",
@@ -28,12 +29,14 @@
         "Verify: pip install -e . && zoidberg-coach --help shows usage"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
+      "verification": "pip install -e . && zoidberg-coach --help",
       "can_verify_without_token": true
     },
     {
       "id": 2,
       "category": "integration",
+      "title": "Garmin Client & Activities",
       "description": "Connect to Garmin via garth library and fetch activities",
       "steps": [
         "Create src/zoidberg_coach/garmin_client.py",
@@ -46,12 +49,14 @@
       ],
       "priority": 1,
       "passes": false,
+      "verification": "zoidberg-coach activities --days 30",
       "can_verify_without_token": false,
       "garth_api": "garth.connectapi('/activitylist-service/activities/search/activities', params={...})"
     },
     {
       "id": 3,
       "category": "integration",
+      "title": "Activity Details",
       "description": "Fetch detailed activity data including splits and heart rate",
       "steps": [
         "Implement get_activity_details(activity_id) in GarminClient",
@@ -62,11 +67,13 @@
       ],
       "priority": 1,
       "passes": false,
+      "verification": "zoidberg-coach activity <id>",
       "can_verify_without_token": false
     },
     {
       "id": 4,
       "category": "integration",
+      "title": "Recovery Metrics",
       "description": "Fetch recovery metrics using garth data classes",
       "steps": [
         "Implement get_sleep(date) using garth.DailySleep.get(date)",
@@ -78,6 +85,7 @@
       ],
       "priority": 2,
       "passes": false,
+      "verification": "zoidberg-coach recovery",
       "can_verify_without_token": false,
       "garth_classes": [
         "DailySleep",
@@ -90,6 +98,7 @@
     {
       "id": 5,
       "category": "analysis",
+      "title": "Weekly Summary",
       "description": "Calculate weekly training load metrics",
       "steps": [
         "Create src/zoidberg_coach/analysis.py",
@@ -101,11 +110,13 @@
       ],
       "priority": 2,
       "passes": false,
+      "verification": "zoidberg-coach summary --weeks 8",
       "can_verify_without_token": false
     },
     {
       "id": 6,
       "category": "analysis",
+      "title": "Polarization Analysis",
       "description": "Implement 80/20 polarized training analysis",
       "steps": [
         "Get user's HR zones from garth.UserSettings or calculate from max HR",
@@ -116,11 +127,13 @@
       ],
       "priority": 2,
       "passes": false,
+      "verification": "zoidberg-coach polarization --weeks 4",
       "can_verify_without_token": false
     },
     {
       "id": 7,
       "category": "analysis",
+      "title": "Readiness Scoring",
       "description": "Recovery readiness scoring",
       "steps": [
         "Create src/zoidberg_coach/coaching.py",
@@ -131,12 +144,14 @@
       ],
       "priority": 3,
       "passes": false,
+      "verification": "pytest tests/test_readiness.py",
       "can_verify_without_token": true,
       "note": "Can unit test scoring logic with mock data"
     },
     {
       "id": 8,
       "category": "coaching",
+      "title": "Daily Workout Suggestions",
       "description": "Generate daily workout suggestions",
       "steps": [
         "Implement suggest_workout(readiness, days_since_hard, days_until_race, weekly_mileage)",
@@ -147,11 +162,13 @@
       ],
       "priority": 3,
       "passes": false,
+      "verification": "zoidberg-coach today",
       "can_verify_without_token": false
     },
     {
       "id": 9,
       "category": "coaching",
+      "title": "Race Readiness",
       "description": "Half marathon race readiness assessment",
       "steps": [
         "Implement race_readiness(activities, target_date, goal_time)",
@@ -163,11 +180,13 @@
       ],
       "priority": 3,
       "passes": false,
+      "verification": "zoidberg-coach race-prep",
       "can_verify_without_token": false
     },
     {
       "id": 10,
       "category": "polish",
+      "title": "Rich UI Polish",
       "description": "Polish CLI output with rich formatting",
       "steps": [
         "Use rich.table.Table for tabular data (activities, weekly summaries)",
@@ -179,11 +198,13 @@
       ],
       "priority": 4,
       "passes": false,
+      "verification": "manual check of output",
       "can_verify_without_token": true
     },
     {
       "id": 11,
       "category": "analysis",
+      "title": "Pattern Detection",
       "description": "Pattern detection and inference engine",
       "steps": [
         "Create src/zoidberg_coach/patterns.py",
@@ -197,6 +218,7 @@
       ],
       "priority": 3,
       "passes": false,
+      "verification": "zoidberg-coach patterns --weeks 8",
       "can_verify_without_token": false,
       "example_insights": [
         "Your best runs happen after 7+ hours of sleep (avg pace 8:15 vs 8:45)",
@@ -208,6 +230,7 @@
     {
       "id": 12,
       "category": "coaching",
+      "title": "Daily Report API",
       "description": "Daily coaching report for Zoidberg cron job",
       "steps": [
         "Create generate_daily_report() returning structured dict with all coaching data",
@@ -219,6 +242,7 @@
       ],
       "priority": 4,
       "passes": false,
+      "verification": "zoidberg-coach daily-report --json",
       "can_verify_without_token": false,
       "note": "This is what Zoidberg will call daily to generate coaching messages for Jon"
     }

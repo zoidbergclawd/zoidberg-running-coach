@@ -4,4 +4,23 @@
 
 ---
 
-(No progress yet - Ralph loop not started)
+### Item 1: Project Scaffold (Route A: simple)
+
+**Status:** COMPLETE
+**Date:** 2026-02-14
+
+**Key decisions:**
+- Scaffold code was already present from initial commit; this pass added tests and fixed `__main__.py`
+- Fixed `__main__.py` to use `if __name__ == "__main__":` guard so importing the module doesn't invoke the CLI
+- Used subprocess-based tests for CLI verification to test the actual user experience
+
+**Files changed:**
+- `src/zoidberg_coach/__main__.py`: Added `if __name__` guard to prevent app() running on import
+- `tests/__init__.py`: Created empty test package init
+- `tests/test_scaffold.py`: 7 tests covering import, version, CLI help, version flag, no-args behavior
+
+**Test results:** 7 passing
+
+**Verification:**
+- `uv run zoidberg-coach --help` shows usage info
+- `uv run zoidberg-coach --version` shows 0.1.0
