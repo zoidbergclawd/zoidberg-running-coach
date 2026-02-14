@@ -24,3 +24,31 @@
 **Verification:**
 - `uv run zoidberg-coach --help` shows usage info
 - `uv run zoidberg-coach --version` shows 0.1.0
+
+---
+
+### Item 2: Garmin Client & Activities (Route B: medium)
+
+**Status:** COMPLETE
+**Date:** 2026-02-14
+
+**Key decisions:**
+- Implemented explicit Garmin error types (`GarminAuthenticationError`, `GarminClientError`) so CLI can fail gracefully with actionable auth guidance
+- Authentication order is `GARTH_TOKEN` first, then saved token path `~/.garth`, matching PRD and garth usage
+- Normalized activity payload to stable keys (`id`, `name`, `type`, `date`, `distance`, `duration`) and filtered by trailing days in client layer
+- Added pace formatting in CLI (`min:sec /mi`) with named constant for unit conversion (`METERS_PER_MILE`)
+- Added runtime type narrowing on API response so static type checking passes cleanly
+
+**Files changed:**
+- `src/zoidberg_coach/garmin_client.py`: Added Garmin client auth/bootstrap, activity fetch+normalize/filter logic, and typed error handling
+- `src/zoidberg_coach/cli.py`: Added `activities` command, pace formatting helper, and graceful Garmin error exits
+- `tests/test_garmin_client.py`: Added auth fallback/error tests and validated activity mapping/filter behavior
+- `prd.json`: Marked Item 2 `passes` as `true`
+
+**Test results:**
+- `uv run pytest -q tests/test_garmin_client.py tests/test_cli_activities.py`: 7 passing
+- `uv run pytest -q`: 14 passing
+- `uv run --with mypy mypy src`: Success (no issues in 4 source files)
+
+**Verification:**
+- `zoidberg-coach activities --days 30` command path implemented with normalized data output including distance and pace

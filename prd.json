@@ -48,7 +48,7 @@
         "Verify: Command lists recent activities with distance and pace"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach activities --days 30",
       "can_verify_without_token": false,
       "garth_api": "garth.connectapi('/activitylist-service/activities/search/activities', params={...})"

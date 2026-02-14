@@ -6,7 +6,7 @@ from datetime import date
 
 import pytest
 
-from zoidberg_coach.garmin_client import GarminClient
+from zoidberg_coach.garmin_client import GarminAuthenticationError, GarminClient
 
 
 class _FakeDate(date):
@@ -32,6 +32,42 @@ def test_garmin_client_uses_env_token(monkeypatch: pytest.MonkeyPatch) -> None:
     GarminClient(token_path="/tmp/should-not-be-used")
 
     assert calls == ["token-from-env"]
+
+
+def test_garmin_client_falls_back_to_token_path(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Client should use token path when GARTH_TOKEN is absent."""
+    calls: list[str] = []
+
+    def fake_configure(*, domain: str) -> None:
+        assert domain == "garmin.com"
+
+    def fake_resume(value: str) -> None:
+        calls.append(value)
+
+    monkeypatch.delenv("GARTH_TOKEN", raising=False)
+    monkeypatch.setattr("zoidberg_coach.garmin_client.garth.configure", fake_configure)
+    monkeypatch.setattr("zoidberg_coach.garmin_client.garth.resume", fake_resume)
+
+    GarminClient(token_path="~/.garth")
+
+    assert calls == ["~/.garth"]
+
+
+def test_garmin_client_raises_auth_error_when_resume_fails(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Client should raise GarminAuthenticationError when auth cannot be resumed."""
+
+    def fake_configure(*, domain: str) -> None:
+        assert domain == "garmin.com"
+
+    def fake_resume(value: str) -> None:
+        raise RuntimeError(f"cannot load token: {value}")
+
+    monkeypatch.delenv("GARTH_TOKEN", raising=False)
+    monkeypatch.setattr("zoidberg_coach.garmin_client.garth.configure", fake_configure)
+    monkeypatch.setattr("zoidberg_coach.garmin_client.garth.resume", fake_resume)
+
+    with pytest.raises(GarminAuthenticationError, match="cannot load token"):
+        GarminClient(token_path="~/.garth")
 
 
 def test_get_activities_maps_fields_and_filters_by_days(monkeypatch: pytest.MonkeyPatch) -> None:
