@@ -124,6 +124,8 @@ def test_get_activities_maps_fields_and_filters_by_days(monkeypatch: pytest.Monk
             "date": "2026-02-12",
             "distance": 5000.0,
             "duration": 1500.0,
+            "avg_hr": 0.0,
+            "max_hr": 0.0,
         }
     ]
 

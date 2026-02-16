@@ -66,7 +66,7 @@
         "Verify: Command shows lap-by-lap breakdown with pace and HR"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach activity <id>",
       "can_verify_without_token": false
     },
@@ -84,7 +84,7 @@
         "Verify: Command shows sleep score, HRV, body battery, stress for a date"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach recovery",
       "can_verify_without_token": false,
       "garth_classes": [
@@ -109,7 +109,7 @@
         "Verify: Shows weekly mileage progression with trend indicators"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach summary --weeks 8",
       "can_verify_without_token": false
     },
@@ -126,7 +126,7 @@
         "Verify: Shows % easy vs % hard with recommendation if ratio is off"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach polarization --weeks 4",
       "can_verify_without_token": false
     },
@@ -143,7 +143,7 @@
         "Verify: readiness_score function works with sample data"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "verification": "pytest tests/test_readiness.py",
       "can_verify_without_token": true,
       "note": "Can unit test scoring logic with mock data"
@@ -161,7 +161,7 @@
         "Verify: Command shows today's readiness + workout suggestion"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach today",
       "can_verify_without_token": false
     },
@@ -179,7 +179,7 @@
         "Verify: Shows readiness assessment with specific recommendations"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach race-prep",
       "can_verify_without_token": false
     },
@@ -197,7 +197,7 @@
         "Verify: All commands produce readable, colorful terminal output"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "verification": "manual check of output",
       "can_verify_without_token": true
     },
@@ -217,7 +217,7 @@
         "Verify: Shows 3-5 actionable insights based on historical data"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach patterns --weeks 8",
       "can_verify_without_token": false,
       "example_insights": [
@@ -241,7 +241,7 @@
         "Verify: Command outputs complete JSON with all coaching context"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "verification": "zoidberg-coach daily-report --json",
       "can_verify_without_token": false,
       "note": "This is what Zoidberg will call daily to generate coaching messages for Jon"
